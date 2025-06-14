@@ -1,8 +1,15 @@
+import 'package:chat_app/cubit/authcubit.dart';
+import 'package:chat_app/cubit/authstate.dart';
+import 'package:chat_app/repositries/authrepo.dart';
+import 'package:chat_app/repositries/routes.dart';
+import 'package:chat_app/repositries/servicelocator.dart';
+import 'package:chat_app/screens/homescreen.dart';
 import 'package:chat_app/screens/signup.dart';
 import 'package:chat_app/theme/mybutton.dart';
 import 'package:chat_app/theme/mytextfield.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -45,7 +52,32 @@ String? _validatepassword(String? text)
     }
     return null;
   }
+  Future<void> handlesignin() async{
+     FocusScope.of(context).unfocus();
+      if(_key.currentState?.validate() ?? false){
+        try {
+          getit<Authrepo>().signin(
+         
+            email: emailcontroller.text, 
+            
+            password: passwordcontroller.text,
+            );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+            ),
+          ),
+        );
+      
+        }
+        }
+      else{
 
+      }
+
+  }
 
    @override
   void dispose()
@@ -60,90 +92,109 @@ String? _validatepassword(String? text)
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Form(
-          key: _key,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                          height: 30,
-                        ),
-                Text("Welcome",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                          height: 10,
-                        ),
+    return BlocListener<Authcubit,Authstate>(
+      bloc: getit<Authcubit>(),
+      listenWhen: (previous, current) {
+        return previous.status!=current.status||previous.error!=current.error;
+      },
+      listener: ( context, state) { 
 
-                Text("sign in to continue ",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey,),
-                ),
-                Mytextfield(mycontroller: emailcontroller,
-                         hinttext: "Email",
-                         prefixIcon: Icon(Icons.email_outlined)
-                         ,focusNode: _emailFocus,
-                         myvalidator: _validateemail,
-                         ),
+        if(state.status==AuthStatus.authenticated)
+        {
+          getit<Approute>().pushutil(Homescreen());
+        }
 
-                const SizedBox(
-                          height: 15,
-                        ),
-
-                
-                Mytextfield(mycontroller: passwordcontroller,
-                 hinttext: "pasword",
-                 isobscure: ispassvisible,
-                 prefixIcon: Icon(Icons.lock),
-                 suffixIcon: IconButton(onPressed:(){
-                  setState(() {
-                    ispassvisible=!ispassvisible;
-                  });
-                 }, icon: Icon(ispassvisible
-                 ?Icons.visibility_off
-                 :Icons.visibility,) 
-                 ),
-                 focusNode: _passwordFocus,
-                 myvalidator: _validatepassword,
-                 ),
-                const SizedBox(
-                          height: 15,
-                        ),
-                Mybutton(text: "Login", on_press: ()=>{
-                   FocusScope.of(context).unfocus(),
-                  if(_key.currentState?.validate() ?? false){},
-                }),
-                 const SizedBox(
-                          height: 15,
-                        ),
-                Center(
-                  child: RichText(text: TextSpan(
-                    text:"don't have an account ?",
-                    style:TextStyle( color:Colors.grey,),
-                    children: [
-                      TextSpan(
-                        text: "sign up",
-                        style: TextStyle(color: Colors.red),
-                        recognizer: TapGestureRecognizer()..onTap= () {
-                          Navigator.push(context,
-                            MaterialPageRoute(builder:(context)=>Signuppage()),
-                          );
-                        }
-                      )
-                    ]
+       },
+      child: Scaffold(
+        // appBar: AppBar(
+      
+        // ),
+        body: SafeArea(
+          child: Form(
+            key: _key,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                            height: 30,
+                          ),
+                  Text("Welcome",
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(
+                            height: 10,
+                          ),
+      
+                  Text("sign in to continue ",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey,),
+                  ),
+                  const SizedBox(
+                            height: 30,
+                          ),
+                  Mytextfield(mycontroller: emailcontroller,
+                           hinttext: "Email",
+                           prefixIcon: Icon(Icons.email_outlined)
+                           ,focusNode: _emailFocus,
+                           myvalidator: _validateemail,
+                           ),
+      
+                  const SizedBox(
+                            height: 15,
+                          ),
+      
                   
-                  )),
-                )
-
-              
-              ],
+                  Mytextfield(mycontroller: passwordcontroller,
+                   hinttext: "pasword",
+                   isobscure: ispassvisible,
+                   prefixIcon: Icon(Icons.lock),
+                   suffixIcon: IconButton(onPressed:(){
+                    setState(() {
+                      ispassvisible=!ispassvisible;
+                    });
+                   }, icon: Icon(ispassvisible
+                   ?Icons.visibility_off
+                   :Icons.visibility,) 
+                   ),
+                   focusNode: _passwordFocus,
+                   myvalidator: _validatepassword,
+                   ),
+                  const SizedBox(
+                            height: 15,
+                          ),
+                  Mybutton(text: "Login", on_press: handlesignin),
+                   const SizedBox(
+                            height: 15,
+                          ),
+                  Center(
+                    child: RichText(text: TextSpan(
+                      text:"don't have an account ?",
+                      style:TextStyle( color:Colors.grey,),
+                      children: [
+                        TextSpan(
+                          text: "sign up",
+                          style: TextStyle(color: Colors.red),
+                          recognizer: TapGestureRecognizer()..onTap= () {
+                            // Navigator.push(context,
+                            //   MaterialPageRoute(builder:(context)=>Signuppage()),
+                            // )
+                            // ;
+                            getit<Approute>().push(Signuppage());
+                          }
+                        )
+                      ]
+                    
+                    )),
+                  )
+      
+                
+                ],
+              ),
+            )
+            )
             ),
-          )
-          )
-          ),
+      ),
     );
   }
 }
