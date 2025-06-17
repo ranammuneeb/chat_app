@@ -56,7 +56,7 @@ String? _validatepassword(String? text)
      FocusScope.of(context).unfocus();
       if(_key.currentState?.validate() ?? false){
         try {
-          getit<Authrepo>().signin(
+         await  getit<Authcubit>().sigin(
          
             email: emailcontroller.text, 
             
@@ -92,11 +92,9 @@ String? _validatepassword(String? text)
   }
   @override
   Widget build(BuildContext context) {
-    return BlocListener<Authcubit,Authstate>(
+    return BlocConsumer<Authcubit,Authstate>(
       bloc: getit<Authcubit>(),
-      listenWhen: (previous, current) {
-        return previous.status!=current.status||previous.error!=current.error;
-      },
+     
       listener: ( context, state) { 
 
         if(state.status==AuthStatus.authenticated)
@@ -105,7 +103,7 @@ String? _validatepassword(String? text)
         }
 
        },
-      child: Scaffold(
+      builder:(context,state) =>Scaffold(
         // appBar: AppBar(
       
         // ),
@@ -163,7 +161,16 @@ String? _validatepassword(String? text)
                   const SizedBox(
                             height: 15,
                           ),
-                  Mybutton(text: "Login", on_press: handlesignin),
+                  Mybutton(text: "signup", on_press: handlesignin,
+                  
+                  
+                  child:state.status==AuthStatus.loading
+                  ? const CircularProgressIndicator(
+                    color: Colors.blueGrey,
+                  )
+                  :const Text("signup")
+                  
+                   ),
                    const SizedBox(
                             height: 15,
                           ),

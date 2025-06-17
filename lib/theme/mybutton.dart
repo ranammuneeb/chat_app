@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 class Mybutton extends StatelessWidget {
   final String? text;
   final Function()? on_press;
+  final Widget? child;
 
-  const Mybutton({super.key, required this.text, required this.on_press});
+  const Mybutton({super.key,  this.text, required this.on_press, this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +14,11 @@ class Mybutton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: on_press,
         
-        child: Text(
+        child:child ??
+        
+         Text(
               text!,
-             
-),)
+            ),)
     );
   }
 }

@@ -96,7 +96,7 @@ class _SignuppageState extends State<Signuppage> {
      FocusScope.of(context).unfocus();
       if(_key.currentState?.validate() ?? false){
         try {
-          getit<Authrepo>().signup(fullName: namecontroller.text,
+         await  getit<Authcubit>().signup(fullName: namecontroller.text,
            username: usernamecontroller.text,
             email: emailcontroller.text, 
             phoneNumber: phonecontroller.text, 
@@ -138,11 +138,9 @@ class _SignuppageState extends State<Signuppage> {
   }
   @override
   Widget build(BuildContext context) {
-    return BlocListener<Authcubit,Authstate>(
+    return BlocConsumer<Authcubit,Authstate>(
       bloc: getit<Authcubit>(),
-      listenWhen: (previous, current) {
-        return previous.status!=current.status||previous.error!=current.error;
-      },
+      
       listener: ( context, state) { 
 
         if(state.status==AuthStatus.authenticated)
@@ -151,7 +149,7 @@ class _SignuppageState extends State<Signuppage> {
         }
 
        },
-      child: Scaffold(
+      builder:(context,state)=> Scaffold(
         body: SafeArea(
           child: Form(
             key: _key,
@@ -235,7 +233,16 @@ class _SignuppageState extends State<Signuppage> {
                   const SizedBox(
                             height: 15,
                           ),
-                  Mybutton(text: "signup", on_press: handlesigup),
+                  Mybutton(text: "signup", on_press: handlesigup,
+                  
+                  
+                  child:state.status==AuthStatus.loading
+                  ? const CircularProgressIndicator(
+                    color: Colors.blueGrey,
+                  )
+                  :const Text("signup")
+                  
+                   ),
                    const SizedBox(
                             height: 15,
                           ),
@@ -265,7 +272,6 @@ class _SignuppageState extends State<Signuppage> {
             )
             )
             ),
-      ),
-    );
+      ));
   }
 }

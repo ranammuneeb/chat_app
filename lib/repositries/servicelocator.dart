@@ -15,7 +15,7 @@ Future<void> servicelocator() async{
       () => FirebaseFirestore.instance);
   getit.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getit.registerLazySingleton(()=>Authrepo());
-  getit.registerFactory(
+  getit.registerLazySingleton(
     ()=>Authcubit(
     authRepository: Authrepo(),
   ));
